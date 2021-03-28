@@ -5,9 +5,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import traceback
 import logging
+from itertools import compress
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.labels']
+
+# Text of errors
+VALUE_ERROR_DEFINE_LABEL_TEXT = "Wrong arguments: {}. The value must be a string"
+VALUE_ERROR_DEFINE_LABEL_COLOR_TEXT = "Missing arguments in 'color': {}"
 
 # Temporary
 color_dict = {
@@ -49,6 +54,33 @@ def get_labels(service):
     return list_of_labels.get('labels')
 
 def define_label(name, color=color_dict['pending'], mlv="show", llv="labelShow", tp="user"):
+
+    value_names_lst = ["name", "mlv", "llv", "tp"]
+    check_lst = list(map(lambda parameter: isinstance(parameter, str), (name, mlv, llv, tp))) 
+    if all(check_lst):
+        pass
+    else:
+        error_message = VALUE_ERROR_DEFINE_LABEL_TEXT.format(
+            list(compress(value_names_lst, [not element for element in check_lst]))
+        )
+        raise ValueError(error_message)
+
+    if not isinstance(color, dict):
+        raise ValueError("color of the lable must be a dictinary")
+    else:
+        value_names_lst = ["textColor", "backgroundColor"]
+        test_lst = [key_list for key_list in color.keys()]
+        check_lst = list(map(lambda parameter: elementinlist(parameter, test_lst), (*value_names_lst, )))
+        if all(check_lst):
+            pass
+        else:
+            print(test_lst)
+            print(check_lst)
+            error_message = VALUE_ERROR_DEFINE_LABEL_COLOR_TEXT.format(
+                list(compress(value_names_lst, [not element for element in check_lst]))
+            )
+            raise ValueError(error_message)
+
     label = dict()
     label["messageListVisibility"] = mlv
     label["labelListVisibility"] = llv
@@ -66,6 +98,13 @@ def add_label_to_gmail(service, label):
         traceback.print_exc()
         logging.error(e)
 
+def elementinlist(element, lst):
+    if isinstance(lst, list):
+        pass
+    else:
+        raise ValueError("Wrong {}.The input parameter must be a list.".format(lst))
+    return element in lst
+
 def main():
     with open('logs/debug.log', 'w'):
         logging.basicConfig(filename='logs/debug.log', encoding='utf-8', level=logging.DEBUG)
@@ -75,4 +114,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    #define_label("test", color={"test":{"test":1, "textColor":1}})
+    define_label("test", **{"color":{"test":1, "backgroundColor":"#ffffff"}})

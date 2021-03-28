@@ -98,6 +98,37 @@ def add_label_to_gmail(service, label):
         traceback.print_exc()
         logging.error(e)
 
+def find_label_by(targetgroup, targetname, service):
+    label_lst = get_labels(service)
+    for element in label_lst:
+        try:
+            if targetname in element[targetgroup]:
+                return element
+        except:
+            pass
+    return None
+
+def update_label(targetgroup, targetname, parameter, service):
+    if not isinstance(parameter, dict):
+        raise ValueError("A new parameter must be a dictinary")
+    label = find_label_by(targetgroup, targetname, service)
+    for key in parameter:
+        label[key] = parameter[key]
+    return label
+
+
+def update_label_in_gmail(targetgroup, targetname, parameter, service):
+    label = update_label(targetgroup, targetname, parameter, service)
+    try:
+        updated_label = service.users().labels().update(userId='me',
+                                                        id=label["id"],
+                                                        body=label).execute()
+        return updated_label
+    except Exception as e:
+        traceback.print_exc()
+        logging.error(e)
+
+
 def elementinlist(element, lst):
     if isinstance(lst, list):
         pass
@@ -109,11 +140,10 @@ def main():
     with open('logs/debug.log', 'w'):
         logging.basicConfig(filename='logs/debug.log', encoding='utf-8', level=logging.DEBUG)
     service = get_service()
-    new_label = define_label("Job Applications/test", color=color_dict["fail"])
-    added_label = add_label_to_gmail(service, new_label)
+    new_label = define_label("Job Applications/test", color=color_dict["pending"])
+    #added_label = add_label_to_gmail(service, new_label)
+    updated_label = update_label_in_gmail("name", "test", {"color":color_dict["pending"]}, service)
 
 
 if __name__ == '__main__':
-    #main()
-    #define_label("test", color={"test":{"test":1, "textColor":1}})
-    define_label("test", **{"color":{"test":1, "backgroundColor":"#ffffff"}})
+    main()

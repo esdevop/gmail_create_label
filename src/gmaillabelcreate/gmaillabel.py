@@ -6,20 +6,22 @@ from google.auth.transport.requests import Request
 import traceback
 import logging
 from itertools import compress
+import json
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.labels']
+
+# Attributes
+PATH_TO_LIB = os.path.join(os.getcwd(), "src/gmaillabelcreate")
+FILENAME_LABEL_COLOR = "label_color.json"
 
 # Text of errors
 VALUE_ERROR_DEFINE_LABEL_TEXT = "Wrong arguments: {}. The value must be a string"
 VALUE_ERROR_DEFINE_LABEL_COLOR_TEXT = "Missing arguments in 'color': {}"
 
 # Temporary
-color_dict = {
-    'fail':{'textColor': '#8a1c0a', 'backgroundColor': '#f2b2a8'},
-    'pending':{'textColor': '#ffffff', 'backgroundColor': '#c2c2c2'},
-    'success':{'textColor': '#0b4f30', 'backgroundColor': '#b3efd3'}
-}
+with open(os.path.join(PATH_TO_LIB, FILENAME_LABEL_COLOR), "r") as f:
+    color_dict = json.load(f)
 
 def get_service():
     """
@@ -146,4 +148,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+
+    print(color_dict)

@@ -130,6 +130,13 @@ def update_label_in_gmail(targetgroup, targetname, parameter, service):
         traceback.print_exc()
         logging.error(e)
 
+def delete_label_in_gmail(targetgroup, targetname, service):
+    label = find_label_by(targetgroup, targetname, service)
+    try:
+        service.users().labels().delete(userId='me', id=label["id"]).execute()
+    except Exception as e:
+        traceback.print_exc()
+        logging.error(e)
 
 def elementinlist(element, lst):
     if isinstance(lst, list):
@@ -144,10 +151,9 @@ def main():
     service = get_service()
     new_label = define_label("Job Applications/test", color=color_dict["pending"])
     #added_label = add_label_to_gmail(service, new_label)
-    updated_label = update_label_in_gmail("name", "test", {"color":color_dict["pending"]}, service)
+    #updated_label = update_label_in_gmail("name", "test", {"color":color_dict["pending"]}, service)
+    delete_label_in_gmail("name", "test", service)
 
 
 if __name__ == '__main__':
-    #main()
-
-    print(color_dict)
+    main()

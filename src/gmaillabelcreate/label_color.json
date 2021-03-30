@@ -10,5 +10,9 @@
     "success":{
        "textColor":"#0b4f30",
        "backgroundColor":"#b3efd3"
+    },
+    "interview":{
+        "textColor": "#7a4706",
+        "backgroundColor": "#ffdeb5"
     }
  }

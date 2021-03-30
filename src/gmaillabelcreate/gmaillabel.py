@@ -3,10 +3,13 @@ import os.path
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+from googleapiclient.errors import HttpError
+from google.api_core.exceptions import AlreadyExists
 import traceback
 import logging
 from itertools import compress
 import json
+
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/gmail.labels']
@@ -19,7 +22,6 @@ FILENAME_LABEL_COLOR = "label_color.json"
 VALUE_ERROR_DEFINE_LABEL_TEXT = "Wrong arguments: {}. The value must be a string"
 VALUE_ERROR_DEFINE_LABEL_COLOR_TEXT = "Missing arguments in 'color': {}"
 
-# Temporary
 with open(os.path.join(PATH_TO_LIB, FILENAME_LABEL_COLOR), "r") as f:
     color_dict = json.load(f)
 
@@ -96,9 +98,16 @@ def add_label_to_gmail(service, label):
         created_label = service.users().labels().create(userId='me',
                                                         body=label).execute()
         return created_label
-    except Exception as e:
-        traceback.print_exc()
-        logging.error(e)
+    except HttpError as err:
+        if err.resp.status in [409]:
+            #raise Warning(str(traceback.print_exc()))
+            return None
+        else:
+            traceback.print_exc()
+            logging.error(err)
+    #except Exception as e:
+    #    traceback.print_exc()
+    #    logging.error(e)
 
 def find_label_by(targetgroup, targetname, service):
     label_lst = get_labels(service)
@@ -145,15 +154,31 @@ def elementinlist(element, lst):
         raise ValueError("Wrong {}.The input parameter must be a list.".format(lst))
     return element in lst
 
-def main():
+def main(label_name, label_color=None, label_delete=False):
     with open('logs/debug.log', 'w'):
         logging.basicConfig(filename='logs/debug.log', encoding='utf-8', level=logging.DEBUG)
     service = get_service()
-    new_label = define_label("Job Applications/test", color=color_dict["pending"])
-    #added_label = add_label_to_gmail(service, new_label)
-    #updated_label = update_label_in_gmail("name", "test", {"color":color_dict["pending"]}, service)
-    delete_label_in_gmail("name", "test", service)
+
+    if label_delete:
+        delete_label_in_gmail("name", label_name, service)
+    else:
+        try:
+            new_label = define_label(label_name, color=label_color)
+            added_label = add_label_to_gmail(service, new_label)
+            if added_label is None:
+                updated_label = update_label_in_gmail("name", label_name, {"color":label_color}, service)
+        except Exception as err:
+            traceback.print_exc()
+            logging.error(err)
 
 
 if __name__ == '__main__':
-    main()
+    label_title = "Job Applications"
+    label_subtitle = "test"
+    label_status = "pending"
+
+    label_name = label_title
+    if label_subtitle:
+        label_name += "/{}".format(label_subtitle)
+    label_color = color_dict[label_status]
+    main(label_name, label_color=label_color)

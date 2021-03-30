@@ -10,7 +10,7 @@ if __name__ == "__main__":
                     type=str, default="Job Applications")
     parser.add_argument("-st", "--subtitle", help="Label subtytle, (str). Note, the label name will be composed from title and subtitle as: 'title/subtitle'.",
                     type=str, default=None)
-    parser.add_argument("-status", "--status", type=str, choices=["pending", "fail", "success"],
+    parser.add_argument("-status", "--status", type=str, choices=["pending", "fail", "success", "interview"],
                     help="Set a status of a label, (str). Defines the label color.", 
                     default="pending")
     parser.add_argument("-d", "--delete", help="Delete a label, (bool)",

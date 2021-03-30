@@ -1,0 +1,14 @@
+{
+    "fail":{
+       "textColor":"#8a1c0a",
+       "backgroundColor":"#f2b2a8"
+    },
+    "pending":{
+       "textColor":"#ffffff",
+       "backgroundColor":"#c2c2c2"
+    },
+    "success":{
+       "textColor":"#0b4f30",
+       "backgroundColor":"#b3efd3"
+    }
+ }
